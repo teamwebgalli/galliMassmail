@@ -2,7 +2,6 @@ Author Information
 
  *	Author : Raez Mon | Team Webgalli
  *	Team Webgalli | Elgg developers and consultants
- *	Mail : info@webgalli.com
  *	Web	: http://webgalli.com
  *	Skype : 'team.webgalli'
  
