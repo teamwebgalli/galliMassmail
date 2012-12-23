@@ -28,7 +28,6 @@ function galliMassmail_send_mails($hook, $entity_type, $returnvalue, $params){
 	$mails = elgg_get_entities_from_metadata(array('types' => 'object', 'subtypes' => 'galliMassmail', 'metadata_name' => 'complete', 'metadata_value' => false ));
 	$limit = 25;
 	$site = elgg_get_site_entity();
-	$site = get_entity($site->guid);
 	if ($site && $site->email) {
 		$from = $site->email;
 	} else {
@@ -41,7 +40,8 @@ function galliMassmail_send_mails($hook, $entity_type, $returnvalue, $params){
 			$offset = $mail->offset;
 			$emails = galliMassmail_select_emails($limit, $offset);
 			if($emails){
-				foreach ($emails as $to) {
+				foreach ($emails as $email) {
+					$to = $email->email;
 					if ($to && is_email_address($to)) {
 						elgg_send_email($from, $to, $subject, $message);
 					}
