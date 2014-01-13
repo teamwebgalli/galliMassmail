@@ -26,6 +26,9 @@ $english = array(
 	'galliMassmail:neededfields' => "All fields are needed.",
 	'galliMail:status:incomplete' => "Incomplete",
 	'galliMail:status:complete' => "Complete",	
+	'galliMassmail:type' => "Message type",
+	'galliMassmail:email' => 'External mail',
+	'galliMassmail:elggmail' => 'Internal message',
 );
 
 add_translation("en",$english);

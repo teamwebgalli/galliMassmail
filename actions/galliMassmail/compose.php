@@ -13,9 +13,10 @@
 
 $subject = get_input('subject');
 $message = get_input('message');
+$message_type = get_input('message_type', 'email');
 
 if(!$subject or !$message){
-	register_error('galliMassmail:neededfields');
+	register_error(elgg_echo('galliMassmail:neededfields'));
 	forward(REFERER);
 }
 
@@ -26,10 +27,11 @@ $massmail->description = $message;
 $massmail->access_id = 2;
 $massmail->complete = false;
 $massmail->offset = 0;
+$massmail->message_type = $message_type;
 if ($massmail->save()) {
 	system_message(elgg_echo('galliMassmail:save:success'));
 } else {
-	register_error('galliMassmail:save:failed');
+	register_error(elgg_echo('galliMassmail:save:failed'));
 }
 
 forward(REFERER);

@@ -23,6 +23,20 @@
 		echo elgg_view('input/plaintext', array('name' => 'message', 'value' => $message));
 	?>	
 </div>	
+
+<?php 
+	if(elgg_is_active_plugin('messages')){
+?>
+	<div>
+		<?php	
+			echo elgg_echo('galliMassmail:type');
+			echo elgg_view('input/dropdown', array('name' => 'message_type', 'options_values' => array('email' => elgg_echo('galliMassmail:email'), 'elggmail' => elgg_echo('galliMassmail:elggmail'))));
+		?>	
+	</div>	
+<?php
+	}
+?>	
+	
 <div>
 	<?php
 		echo elgg_view('input/submit', array('name' => 'submit', 'value' => elgg_echo('galliMassmail:submit')));

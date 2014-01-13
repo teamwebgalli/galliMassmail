@@ -26,44 +26,79 @@ function galliMassmail_init() {
 
 function galliMassmail_send_mails($hook, $entity_type, $returnvalue, $params){
 	$mails = elgg_get_entities_from_metadata(array('types' => 'object', 'subtypes' => 'galliMassmail', 'metadata_name' => 'complete', 'metadata_value' => false ));
-	$limit = 25;
 	$site = elgg_get_site_entity();
 	if ($site && $site->email) {
 		$from = $site->email;
 	} else {
 		$from = 'noreply@' . get_site_domain($site->guid);
 	}
+	$limit = 25;
 	if($mails){
 		foreach($mails as $mail){
 			$subject = $mail->title;
 			$message = $mail->description;
-			$offset = $mail->offset;
-			$emails = galliMassmail_select_emails($limit, $offset);
-			if($emails){
-				foreach ($emails as $email) {
-					$to = $email->email;
-					if ($to && is_email_address($to)) {
-						elgg_send_email($from, $to, $subject, $message);
+			$offset = (int) $mail->offset;
+			$message_type = $mail->message_type;
+			$increment = (int) $limit + $offset;
+			if($message_type == 'elggmail'){
+				$guids = galliMassmail_select_users('guid', $limit, $offset);
+				if($guids){
+					foreach ($guids as $guid) {
+						$recipient_guid = (int) $guid->guid;
+						if ($recipient_guid) {
+							// Internal message
+							// Adopted from messages' plugin
+							$sender_guid = (int) elgg_get_logged_in_user_guid();
+							// Initialise 2 new ElggObject
+							$message_to = new ElggObject();
+							$message_to->subtype = "messages";
+							$message_to->owner_guid = $recipient_guid;
+							$message_to->container_guid = $recipient_guid;
+							$message_to->title = $subject;
+							$message_to->description = $message;
+							$message_to->toId = $recipient_guid; // the user receiving the message
+							$message_to->fromId = $sender_guid; // the user receiving the message
+							$message_to->readYet = 0; // this is a toggle between 0 / 1 (1 = read)
+							$message_to->hiddenFrom = 0; // this is used when a user deletes a message in their sentbox, it is a flag
+							$message_to->hiddenTo = 0; // this is used when a user deletes a message in their inbox
+							$message_to->msg = 1;
+							// Save the copy of the message that goes to the recipient
+							$message_to->access_id = ACCESS_PRIVATE;
+							$message_to->save();
+						}
 					}
+					galliMassmail_set_metadata($mail, 'offset', $increment);
+				} else {
+					galliMassmail_set_metadata($mail, 'complete', true);
 				}
-				galliMassmail_set_metadata($mail, 'offset', $limit + $offset);
 			} else {
-				galliMassmail_set_metadata($mail, 'complete', true);
+				$emails = galliMassmail_select_users('email', $limit, $offset);
+				if($emails){
+					foreach ($emails as $email) {
+						$to = $email->email;
+						if ($to && is_email_address($to)) {
+							elgg_send_email($from, $to, $subject, $message);
+						}
+					}
+					$increment = (int) $limit + $offset;
+					galliMassmail_set_metadata($mail, 'offset', $increment);
+				} else {
+					galliMassmail_set_metadata($mail, 'complete', true);
+				}
 			}
 		}	
 	}
 }	
 
-function galliMassmail_select_emails($limit = 10, $offset =0){
+function galliMassmail_select_users($select = 'email', $limit = 10, $offset =0){
 	$dbPrefix = elgg_get_config('dbprefix');
-	$query = "SELECT email from {$dbPrefix}users_entity ORDER BY {$dbPrefix}users_entity.guid DESC LIMIT $offset, $limit";
+	$query = "SELECT $select from {$dbPrefix}users_entity ORDER BY {$dbPrefix}users_entity.guid ASC LIMIT $offset, $limit";
 	return get_data($query);
 }
 
 function galliMassmail_set_metadata($entity, $md_name, $md_value){
 	$ia = elgg_set_ignore_access(true);
-	$entity->$md_name = $md_value;
-	$entity->save();
+	create_metadata($entity->guid, $md_name, $md_value, "integer", 0, 2, false);
 	elgg_set_ignore_access($ia);
 }
 
