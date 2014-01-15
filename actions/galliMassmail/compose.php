@@ -28,6 +28,7 @@ $massmail->access_id = 2;
 $massmail->complete = false;
 $massmail->offset = 0;
 $massmail->message_type = $message_type;
+$massmail->owner_guid = (int) elgg_get_logged_in_user_guid();
 if ($massmail->save()) {
 	system_message(elgg_echo('galliMassmail:save:success'));
 } else {

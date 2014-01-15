@@ -48,7 +48,7 @@ function galliMassmail_send_mails($hook, $entity_type, $returnvalue, $params){
 						if ($recipient_guid) {
 							// Internal message
 							// Adopted from messages' plugin
-							$sender_guid = (int) elgg_get_logged_in_user_guid();
+							$sender_guid = (int) $mail->owner_guid;
 							// Initialise 2 new ElggObject
 							$message_to = new ElggObject();
 							$message_to->subtype = "messages";
